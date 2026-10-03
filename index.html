@@ -117,6 +117,7 @@
 </style>
 
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>  <!-- ========== PÁGINA INICIAL: LOCAIS / PROJETOS ========== -->  <div class="wrap" id="homeView">
   <h1>🔧 Controle de Manutenção</h1>
@@ -984,21 +985,8 @@
   }
 
   async function shareFiles(files, title){
-    // 1) Dentro do APP (WebViewer do Kodular): manda o PDF em base64
-    //    para o Kodular salvar o arquivo no celular
-    if(isKodular()){
-      showToast("Enviando PDF para o app...");
-      try{
-        for(let i = 0; i < files.length; i++){
-          const b64 = await fileToBase64(files[i]);
-          AppInventor.setWebViewString("PDF:" + files[i].name + "|" + b64);
-          if(i < files.length - 1) await new Promise(function(r){ setTimeout(r, 1500); });
-        }
-        return true;
-      }catch(e){ return false; }
-    }
-    // 2) Navegador de CELULAR: abre o menu de compartilhar (WhatsApp, Drive etc.)
-    if(navigator.canShare && navigator.canShare({ files: files })){
+    // 1) Navegador de CELULAR (Chrome/Safari fora do app): menu de compartilhar
+    if(!isKodular() && navigator.canShare && navigator.canShare({ files: files })){
       try{
         await navigator.share({ files: files, title: title });
         return true;
@@ -1006,7 +994,9 @@
         return false; // usuário cancelou
       }
     }
-    // 3) Navegador de PC (ou sem compartilhamento): baixa os arquivos direto
+    // 2) PC e APP (WebViewer do Kodular com extensão WebViewExtra):
+    //    baixa via blob URL -> cai na pasta Download do celular
+    if(isKodular()) showToast("Salvando PDF na pasta Downloads...");
     files.forEach(function(f){
       const a = document.createElement("a");
       a.href = URL.createObjectURL(f);
