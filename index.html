@@ -114,9 +114,28 @@
 .card { padding: 12px; }
 .row-actions button { flex: 1 1 28%; font-size: 12px; }
 }
+
+/* ===== SISTEMA DE AJUDA / TUTORIAL (camada independente) ===== */
+.tut-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:flex-end;justify-content:center;padding:12px;}
+.tut-overlay.open{display:flex;}
+.tut-card{background:#fff;border-radius:16px;max-width:480px;width:100%;padding:18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tutUp .25s ease;max-height:80vh;overflow-y:auto;}
+@keyframes tutUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.tut-card h3{font-size:16px;margin:0 0 8px;}
+.tut-card .tut-body{font-size:14px;color:#333;line-height:1.55;}
+.tut-card .tut-body b{color:#111;}
+.tut-progress{font-size:12px;color:#888;margin-top:10px;}
+.tut-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.tut-actions .btn{flex:1;min-height:44px;font-size:14px;}
+.tut-skip{background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:10px;width:100%;text-align:center;min-height:40px;}
+.tut-dont{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;margin-top:10px;}
+.tut-dont input{width:20px;height:20px;accent-color:#111;flex:0 0 auto;}
+.tut-highlight{position:relative;z-index:401 !important;box-shadow:0 0 0 3px #111,0 0 0 8px rgba(255,255,255,.85) !important;border-radius:12px !important;}
+.tut-topic{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border:1px solid #e0e0e0;border-radius:12px;background:#fafafa;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:500;color:#111;min-height:46px;font-family:inherit;}
+.tut-topic:active{background:#eee;}
+@media (min-width:620px){.tut-overlay{align-items:center;}}
+
 </style>
 
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>  <!-- ========== PÁGINA INICIAL: LOCAIS / PROJETOS ========== -->  <div class="wrap" id="homeView">
@@ -156,6 +175,7 @@
     </div>
     <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;font-weight:600;" onclick="createProject()">Criar sistema</button>
   </div>    <div class="toolbar">
+    <button class="btn" onclick="tutOpenMenu()">❓ Como usar</button>
     <button class="btn" onclick="exportFullBackup()">💾 Backup geral</button>
     <label class="btn" style="position:relative;overflow:hidden;flex:1;text-align:center;">
       ⬆️ Restaurar backup
@@ -173,6 +193,7 @@
         <div class="app-sub" id="appSubtitle"></div>
       </div>
       <button class="btn" onclick="editCurrentProject()">✏️</button>
+      <button class="btn" onclick="tutOpenMenu()">❓</button>
     </div>
   </div>    <div class="stats" id="stats"></div>    <div class="tabs" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-tab="pendencias">Pendências</button>
@@ -318,6 +339,67 @@
     saveProjects();
   }
   projects.forEach(p=>{ if(!p.icon) p.icon = "🏢"; });
+
+
+  // ============================
+  // PRÉ-CARGA: HOTEL PLAZA TRÊS RIOS
+  // Cria o projeto e importa as ocorrências uma única vez,
+  // sem apagar nem substituir nada do que já existir.
+  // ============================
+  const SEED_HOTEL = {
+    icon: "\uD83C\uDFE8",
+    nome: "Hotel Plaza Tr\u00eas Rios",
+    cnpj: "66.529.452/0001-73",
+    endereco: "Rua XV de Novembro, n\u00ba 320, Apto 101, Centro, Tr\u00eas Rios - RJ, CEP 25804-000",
+    servico: "Manuten\u00e7\u00e3o de ar-condicionado e refrigera\u00e7\u00e3o dos quartos"
+  };
+  const SEED_HOTEL_ITEMS = [
+{id:1, section:"pendencias", room:"Quarto 251", desc:"Problema: Compressor trancado + vazamento na tubulação. Equipamento não gelava.\nProcedimento: Verificação de capacitor, térmico e teste com módulo de compressor → confirmado compressor definitivamente travado. Equipamento do 251 foi trocado pelo do 751 (que passou a ser o novo 251). Identificada porca rachada e solda mal feita da empresa anterior. Porca e solda corrigidas.\nAcompanhamento de pressão:\n01/10 às 12h: 124,8 psi\n01/10 às 14h41: 100,6 psi\n07/10: vácuo chegou a -7,4 psi (vazamento ainda presente).\nStatus atual: Equipamento funcionando adequadamente após a troca.\nPendências: Continuar monitoramento de vazamento. Condensadora ainda ausente (está no grupo de troca).", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:2, section:"pendencias", room:"Quarto 254", desc:"Problema: Quarto em manutenção. Sem condensadora. Piso ruim. Equipamento TCL novo.\nProcedimento: Condensadora localizada no 4º andar.\nStatus atual: Sem condensadora instalada.\nPendências: Instalar condensadora. Avaliar troca do equipamento com o quarto da Camila (575) ou com o 854.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:3, section:"pendencias", room:"Quarto 255", desc:"Problema: Cartão da porta não funciona. Baixa de gás + reclamação de vazamento pela Camila.\nProcedimento: Carga de gás em 01/10 (de 86,4 psi para 111,8 psi). Nova leitura: 110 psi. Confirmado vazamento após reclamação da Camila.\nStatus atual: Em monitoramento.\nPendências: Aguardar e verificar se o vazamento continua. Resolver problema do cartão da porta.", status:"urgente", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:4, section:"pendencias", room:"Quarto 257", desc:"Problema: Possível vazamento (reclamação da Camila).\nProcedimento: Máquina lavada. Carga de gás em 06/10. Monitoramento posterior → não apresentou vazamento.\nStatus atual: Adequado para uso / está ótimo.\nPendências: Nenhuma no momento (apenas observação).", status:"ok", photos:[], photosDepois:[], arquivado:true, docBaixado:false},
+{id:5, section:"pendencias", room:"Quarto 375", desc:"Problema: Sem condensadora. Após instalação de condensadora nova (29/09 com R-410A) ocorreu vazamento na tubulação em 01/10. Equipamento Agratto antigo. Equipamento desarma na primeira vez.\nProcedimento: Condensadora instalada em 29/09. Em 01/10: chamada por baixa de gás → vazamento na tubulação (imperceptível sem nitrogênio).\nStatus atual: Sem condensadora original + vazamento na tubulação.\nPendências: Localizar e corrigir vazamento na tubulação (teste com nitrogênio). Avaliar necessidade de troca do equipamento.", status:"urgente", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:6, section:"pendencias", room:"Quarto 551", desc:"Problema: Baixa de gás refrigerante. Microvazamento identificado apenas pelo manifold (não visível fisicamente). Equipamento Agratto velho, já mexido.\nProcedimento: Desmontagem da máquina. Confirmação de que não é problema de disjuntor. Identificação de microvazamento pelo manifold. Acesso à condensadora pelo quarto 556 (tubulação possivelmente passa pelo 554).\nStatus atual: Desmontado / em tratamento.\nPendências: Aplicar tapa-fuga. Monitorar pressão após aplicação. Avaliar troca do equipamento se o vazamento persistir.", status:"urgente", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:7, section:"orcamentos", room:"Quarto 771", desc:"Problema: Compressor ruim (problema elétrico no original + problema na serpentina no compressor substituto).\nProcedimento: Troca de compressores entre si (um estava parado sem uso). Solda com fuscope realizada. Compressores trocados foram retirados. Intervenção não resolveu.\nStatus atual: Equipamento parado.\nPendências: Comprar compressor novo 9.000 BTU R-410A.", status:"urgente", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:8, section:"pendencias", room:"Quarto 754", desc:"Problema: Não está gelando. Vazamento na válvula Schrader.\nProcedimento: Pressão estava em 1,1 psi → carga de gás R-410A. Vazamento localizado diretamente na válvula Schrader. Colocado \"tampão\" na válvula.\nStatus atual: Tampão paliativo instalado.\nPendência: Trocar a válvula Schrader (o tampão não é solução definitiva).", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:9, section:"pendencias", room:"Quarto 465", desc:"Problema: Não armava + baixa de gás + poça de óleo perto do capilar (indicação de vazamento).\nProcedimento: Capacitor de 15 µF trocado por 20 µF. Identificada poça de óleo próxima ao capilar.\nStatus atual: Em investigação de vazamento.\nPendências: Localizar e eliminar o vazamento. Verificar se a carga de gás se mantém.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:10, section:"pendencias", room:"Quarto 461", desc:"Problema: Vazamento recorrente.\nProcedimento: Vazou em 01/10 e novamente em 06/10. Foi considerado \"resolvido\", porém o vazamento voltou.\nStatus atual: Em observação.\nPendência: Se vazar novamente → tratar como vazamento definitivo e localizar origem.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:11, section:"pendencias", room:"Quarto 252", desc:"Problema: Vazamento de água (07/09) + possível vazamento de R-410A.\nFeito: Dreno desentupido por Felipe.\nPendência: Monitorar pressão (~60 psi).", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:12, section:"pendencias", room:"Quarto 253", desc:"Problema: Ar pingando.\nFeito: —\nPendência: Verificar dreno e bandeja.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:13, section:"pendencias", room:"Quarto 262", desc:"Problema: Infiltração no piso.\nFeito: —\nPendência: Identificar origem.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:14, section:"pendencias", room:"Quarto 455", desc:"Problema: Não gelando + sem controle.\nFeito: —\nPendência: Verificar carga de gás + providenciar controle.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:15, section:"pendencias", room:"Quarto 453", desc:"Problema: Porta não abre.\nFeito: —\nPendência: Resolver fechadura/cartão.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:16, section:"pendencias", room:"Quarto 765", desc:"Problema: Cano dentro da parede molhando o piso.\nFeito: —\nPendência: Abrir parede e inspecionar.", status:"urgente", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:17, section:"pendencias", room:"Quarto 661", desc:"Problema: Display com falha (não mostra número).\nFeito: Sem vazamento confirmado.\nPendência: Trocar/reparar display.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:18, section:"pendencias", room:"Quarto 662", desc:"Problema: Barulho alto só na partida.\nFeito: Sem gotejamento.\nPendência: Lubrificar fan.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:19, section:"pendencias", room:"Quarto 663", desc:"Problema: Barulho no ventilador.\nFeito: Sem vazamento.\nPendência: Lubrificar fan.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:20, section:"pendencias", room:"Quarto 561", desc:"Problema: Relato de pingos.\nFeito: Inspeção — nenhum indício de água, fan no mínimo.\nPendência: Ajustar velocidade do fan.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:21, section:"pendencias", room:"Quarto 271", desc:"Problema: Motorzinho com problema.\nFeito: Funcionando adequadamente.\nPendência: Trocar motorzinho + verificar controle.", status:"atencao", photos:[], photosDepois:[], arquivado:false, docBaixado:false},
+{id:22, section:"pendencias", room:"Quarto 852", desc:"Problema: Controle com problema.\nFeito: Controle universal (cód. 307) trocado por um compatível com o modelo no dia 06/10.\nStatus: Finalizado ✅", status:"ok", photos:[], photosDepois:[], arquivado:true, docBaixado:false},
+{id:23, section:"pendencias", room:"Quarto 861", desc:"Problema: Vazamento + dreno fora.\nFeito: Vazamento resolvido.\nStatus: Finalizado ✅", status:"ok", photos:[], photosDepois:[], arquivado:true, docBaixado:false}
+  ];
+  (function seedHotel(){
+    try{
+      let p = projects.find(function(x){ return x.nome === SEED_HOTEL.nome; });
+      if(!p){
+        p = {
+          id: projects.length ? Math.max.apply(null, projects.map(function(x){ return x.id; })) + 1 : 1,
+          icon: SEED_HOTEL.icon, nome: SEED_HOTEL.nome, cnpj: SEED_HOTEL.cnpj,
+          endereco: SEED_HOTEL.endereco, servico: SEED_HOTEL.servico, criadoEm: Date.now()
+        };
+        projects.push(p);
+        saveProjects();
+      } else if(!p.cnpj){
+        p.cnpj = SEED_HOTEL.cnpj; p.endereco = SEED_HOTEL.endereco;
+        p.servico = SEED_HOTEL.servico; if(!p.icon) p.icon = SEED_HOTEL.icon;
+        saveProjects();
+      }
+      const jaTem = loadProjectItems(p);
+      if(!jaTem.length){
+        localStorage.setItem(itemKey(p.id), JSON.stringify(SEED_HOTEL_ITEMS));
+      }
+    }catch(e){}
+  })();
 
   function saveProjects(){ localStorage.setItem(KEY_PROJECTS, JSON.stringify(projects)); }
   function itemKey(id){ return KEY_ITEMS_PREFIX + id; }
@@ -888,11 +970,12 @@
     return null;
   }
 
-  function buildItemPDF(it){
+  function buildItemPDF(it, existingDoc, isContinuation){
     const JsPDF = getJsPDF();
     if(!JsPDF) return null;
     const p = getProject(currentProjectId) || {};
-    const doc = new JsPDF({ unit: "mm", format: "a4" });
+    const doc = existingDoc || new JsPDF({ unit: "mm", format: "a4" });
+    if(isContinuation) doc.addPage();
     const pageW = doc.internal.pageSize.getWidth();
     const margin = 14;
     let y = 18;
@@ -971,42 +1054,17 @@
     return new File([blob], pdfFileName(it), { type: "application/pdf" });
   }
 
-  function isKodular(){
-    return typeof AppInventor !== "undefined" && typeof AppInventor.setWebViewString === "function";
-  }
-
-  function fileToBase64(file){
-    return new Promise(function(res, rej){
-      const r = new FileReader();
-      r.onload = function(){ res(String(r.result).split(",")[1]); };
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-  }
-
   async function shareFiles(files, title){
-    // 1) Navegador de CELULAR (Chrome/Safari fora do app): menu de compartilhar
-    if(!isKodular() && navigator.canShare && navigator.canShare({ files: files })){
-      try{
-        await navigator.share({ files: files, title: title });
-        return true;
-      }catch(e){
-        return false; // usuário cancelou
-      }
+    if(!navigator.canShare || !navigator.canShare({ files: files })){
+      alert("Este aparelho não suporta compartilhamento de arquivos.\nAtualize o Android System WebView na Play Store e tente novamente.");
+      return false;
     }
-    // 2) PC e APP (WebViewer do Kodular com extensão WebViewExtra):
-    //    baixa via blob URL -> cai na pasta Download do celular
-    if(isKodular()) showToast("Salvando PDF na pasta Downloads...");
-    files.forEach(function(f){
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(f);
-      a.download = f.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
-    });
-    return true;
+    try{
+      await navigator.share({ files: files, title: title });
+      return true;
+    }catch(e){
+      return false; // usuário cancelou
+    }
   }
 
   window.downloadItemPDF = async function(id){
@@ -1024,21 +1082,39 @@
   };
 
   window.batchPDF = async function(){
+    tutCtx("pdf", "PDF dos selecionados 📄", "Selecione os itens desejados e toque em <b>📄 PDF selec.</b>.<br><br>O sistema gera <b>um único PDF</b> com todos eles, abre em uma nova página e permite <b>compartilhar tudo junto</b> (WhatsApp, e-mail etc.).");
     const sel = items.filter(it=>selectedIds.has(it.id));
     if(!sel.length){ alert("Selecione pelo menos um item."); return; }
-    const files = [];
-    sel.forEach(it=>{
-      const doc = buildItemPDF(it);
-      if(doc){ files.push(docToFile(doc, it)); it.docBaixado = true; }
-    });
-    const ok = await shareFiles(files, "Relatórios de Manutenção");
+    let doc = null;
+    sel.forEach(function(it, i){ doc = buildItemPDF(it, doc, i > 0); });
+    if(!doc) return;
+    const blob = doc.output("blob");
+    const file = new File([blob], "manutencao_selecionados_" + sel.length + ".pdf", { type: "application/pdf" });
+    openPDFPreview(blob, file.name);
+    const ok = await shareFiles([file], "Relatórios de Manutenção");
     if(ok){
+      sel.forEach(function(it){ it.docBaixado = true; });
       selectedIds.clear();
       saveStore();
       render();
-      showToast(files.length + " PDF(s) compartilhado(s)!");
+      showToast("PDF compartilhado!");
     }
   };
+
+  function openPDFPreview(blob, name){
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, "_blank");
+    if(!w){
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Aba bloqueada — PDF baixado!");
+    }
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 120000);
+  }
 
   window.downloadAllNewPDFs = async function(){
     const novos = items.filter(it=>!it.docBaixado && !it.arquivado);
@@ -1123,6 +1199,225 @@
   // ============================
   // Inicialização
   // ============================
+
+  // ============================
+  // SISTEMA DE AJUDA / TUTORIAL
+  // (camada independente - não altera dados da manutenção)
+  // ============================
+  const TUT_KEY = "manut_tutorial_v1";
+  let tutState = { intro:false, skipAll:false, rapido:false, ctx:{}, dont:{} };
+  try{
+    const _ts = JSON.parse(localStorage.getItem(TUT_KEY) || "null");
+    if(_ts) tutState = Object.assign(tutState, _ts);
+  }catch(e){}
+  function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tutState)); }catch(e){} }
+
+  // ---- Conteúdo dos tutoriais ----
+  const TUT_INTRO = [
+    { title:"Bem-vindo ao Controle de Manutenção 🛠️", html:"Este sistema ajuda você a <b>registrar problemas</b>, acompanhar serviços, controlar <b>compras</b>, <b>orçamentos</b>, fotos, relatórios e todo o <b>histórico</b> dos equipamentos.<br><br>Você pode pular esta apresentação a qualquer momento." },
+    { title:"1️⃣ Cadastre o local", html:"Na tela inicial, crie um sistema para cada local: hotel, prédio, galpão, casa...<br><br>Informe o <b>nome</b>, CNPJ, endereço e o serviço em geral.", target:"#pNome" },
+    { title:"2️⃣ Registre o problema", html:"Dentro do local, use <b>+ Adicionar item</b> para registrar cada problema: quarto/andar/local, descrição, status e fotos." },
+    { title:"3️⃣ Acompanhe o andamento", html:"Use as abas <b>Pendências</b>, <b>Não vistos</b>, <b>Orçamentos</b>, <b>Arquivados</b> e <b>Todos</b> para acompanhar cada serviço.", target:".tabs" },
+    { title:"4️⃣ Fotos e relatórios", html:"Adicione fotos de <b>antes</b> e <b>depois</b> do serviço e gere <b>PDFs</b> para compartilhar pelo WhatsApp ou salvar." },
+    { title:"5️⃣ Faça backup", html:"Use <b>💾 Backup geral</b> para salvar tudo em um arquivo JSON e <b>⬆️ Restaurar backup</b> para recuperar.<br><br>Seus dados ficam guardados no navegador do aparelho." }
+  ];
+
+  const TUT_RAPIDO = [
+    { title:"Tutorial rápido ⚡", html:"O essencial do sistema em cerca de 1 minuto." },
+    { title:"1. Cadastre o local/equipamento", html:"Crie um sistema para cada local na <b>tela inicial</b>." },
+    { title:"2. Registre o problema", html:"Use <b>+ Adicionar item</b>: informe quarto/local, descrição e status." },
+    { title:"3. Acompanhe o status", html:"Marque como <b>Urgente</b>, <b>Atenção</b>, <b>OK</b> ou <b>Info</b> e acompanhe pelas abas." },
+    { title:"4. Controle materiais/compras", html:"A aba <b>Orçamentos</b> reúne o que precisa ser comprado ou orçado no futuro." },
+    { title:"5. Faça o serviço", html:"Registre o que foi feito na descrição do item." },
+    { title:"6. Fotos e relatório", html:"Adicione fotos de antes/depois e gere o <b>PDF</b>." },
+    { title:"7. Conclua e arquive", html:"Ao resolver, use <b>📁 Arquivar</b> — sai das pendências e fica no histórico." },
+    { title:"8. Consulte o histórico", html:"As abas <b>Arquivados</b> e <b>Todos</b> mostram tudo que já aconteceu. ✅" }
+  ];
+
+  const TUT_TOPICS = [
+    { icon:"🏢", title:"Como cadastrar um local", steps:[
+      { title:"Cadastro de local 🏢", html:"Na tela inicial, preencha o <b>nome do local</b> (obrigatório) e, se quiser, CNPJ, endereço e serviço em geral.", target:"#pNome" },
+      { title:"Criar sistema", html:"Toque em <b>Criar sistema</b>. Você poderá registrar <b>vários problemas diferentes</b> nesse mesmo local ao longo do tempo.", target:"#pNome" }
+    ]},
+    { icon:"➕", title:"Como registrar um problema", steps:[
+      { title:"Adicionar ocorrência ➕", html:"Use <b>+ Adicionar item</b> quando encontrar um novo problema ou serviço." },
+      { title:"Local + descrição", html:"Informe o <b>quarto / andar / local</b> e descreva o problema com detalhes.", target:"#fRoom" },
+      { title:"Mesmo local, novo problema", html:"📌 Se o mesmo quarto tiver outro problema depois, <b>não crie outro local</b> — crie uma nova ocorrência. Assim o histórico fica reunido." }
+    ]},
+    { icon:"🔁", title:"Como alterar o status", steps:[
+      { title:"Status 🔁", html:"O status mostra em que etapa a manutenção está: <b>Urgente → Atenção → OK/Resolvido</b>." },
+      { title:"Como mudar", html:"Toque em <b>✏️ Editar</b> no item e escolha o novo status. O item muda automaticamente de aba/filtro conforme o status." }
+    ]},
+    { icon:"📷", title:"Como adicionar fotos", steps:[
+      { title:"Fotos 📷", html:"Documente o problema e o resultado:" },
+      { title:"Quando fotografar", html:"• <b>Antes</b> — o problema como estava<br>• <b>Depois</b> — como ficou o serviço<br>• Placa/dados do equipamento<br>• Detalhes do defeito" },
+      { title:"Como adicionar", html:"No cadastro do item, use os campos de fotos — ou toque em <b>📷 Antes</b> / <b>✅ Depois</b> direto no card do item." }
+    ]},
+    { icon:"📄", title:"Como gerar PDF", steps:[
+      { title:"Relatórios em PDF 📄", html:"O PDF é gerado <b>pelo próprio sistema</b>, sem depender do aplicativo." },
+      { title:"PDF dos novos", html:"<b>📄 PDF dos novos</b> gera um relatório com todos os itens ainda não enviados." },
+      { title:"PDF selecionados", html:"Marque os itens desejados e toque em <b>📄 PDF selec.</b> — todos abrem <b>juntos em uma única página</b> e você pode <b>compartilhar tudo junto</b>." }
+    ]},
+    { icon:"🧾", title:"Como criar orçamento", steps:[
+      { title:"Orçamentos 🧾", html:"A aba <b>Orçamentos</b> reúne os serviços que dependem de orçamento: peças, instalações, mão de obra, material + mão de obra." },
+      { title:"Como registrar", html:"Crie um item com a seção <b>Orçamentos</b> descrevendo o que precisa ser orçado: materiais, quantidades, valores e observações." }
+    ]},
+    { icon:"🗂️", title:"Como consultar o histórico", steps:[
+      { title:"Histórico 🗂️", html:"Tudo que aconteceu fica guardado. Nada é apagado quando um novo evento é criado." },
+      { title:"Onde ver", html:"A aba <b>Arquivados</b> mostra os itens concluídos e <b>Todos</b> mostra o quadro completo do local." }
+    ]},
+    { icon:"🔍", title:"Como pesquisar e filtrar", steps:[
+      { title:"Pesquisa 🔍", html:"Use a busca para encontrar rapidamente um local, quarto, equipamento, problema ou material.", target:"#searchInput" },
+      { title:"Exemplos", html:"• <b>444</b> → encontra o quarto 444<br>• <b>compressor</b> → ocorrências de compressor<br>• <b>vazamento</b> → problemas de vazamento<br>• <b>R410A</b> → registros com R410A" }
+    ]},
+    { icon:"💾", title:"Como fazer backup", steps:[
+      { title:"Backup 💾", html:"Toque em <b>💾 Backup geral</b> na tela inicial. Um arquivo JSON com <b>todos os locais e itens</b> (incluindo fotos) será salvo na pasta Downloads." },
+      { title:"Importante", html:"Os dados ficam no <b>navegador do aparelho</b>. Faça backup regularmente e guarde o arquivo com segurança." }
+    ]},
+    { icon:"⬆️", title:"Como restaurar backup", steps:[
+      { title:"Restaurar ⬆️", html:"Na tela inicial, toque em <b>⬆️ Restaurar backup</b> e escolha o arquivo JSON salvo." },
+      { title:"Atenção", html:"A restauração <b>substitui os dados atuais</b>. Confirme apenas se tiver certeza do arquivo." }
+    ]}
+  ];
+
+  // ---- Motor do tutorial ----
+  let tutSteps = [], tutIdx = 0, tutMode = "", tutKey = "";
+
+  function ensureTutDOM(){
+    if(document.getElementById("tutOverlay")) return;
+    const o = document.createElement("div");
+    o.id = "tutOverlay";
+    o.className = "tut-overlay";
+    o.innerHTML = '<div class="tut-card" id="tutCard"></div>';
+    o.addEventListener("click", function(e){ if(e.target === o) tutClose(); });
+    document.body.appendChild(o);
+  }
+  function tutShowCard(inner){
+    ensureTutDOM();
+    document.getElementById("tutCard").innerHTML = inner;
+    document.getElementById("tutOverlay").classList.add("open");
+  }
+  window.tutClose = function(){
+    const o = document.getElementById("tutOverlay");
+    if(o) o.classList.remove("open");
+    document.querySelectorAll(".tut-highlight").forEach(function(e){ e.classList.remove("tut-highlight"); });
+  };
+  function tutPlay(steps, mode, key){
+    tutSteps = steps; tutIdx = 0; tutMode = mode || ""; tutKey = key || "";
+    tutRender();
+  }
+  window.tutPlay = tutPlay;
+  window.tutNext = function(){
+    if(tutIdx < tutSteps.length - 1){ tutIdx++; tutRender(); }
+    else tutFinish(false);
+  };
+  window.tutSkip = function(){ tutFinish(true); };
+  function tutFinish(skipped){
+    const chk = document.getElementById("tutDont");
+    const dont = chk && chk.checked;
+    if(tutMode === "intro"){ tutState.intro = true; if(skipped) tutState.skipAll = true; }
+    else if(tutMode === "rapido"){ tutState.rapido = true; }
+    else if(tutMode === "topic"){ /* sempre pode reabrir pelo menu */ }
+    else if(tutMode === "ctx" && tutKey){
+      tutState.ctx[tutKey] = true;
+      if(dont) tutState.dont[tutKey] = true;
+    }
+    tutSave();
+    tutClose();
+  }
+  function tutRender(){
+    const s = tutSteps[tutIdx];
+    document.querySelectorAll(".tut-highlight").forEach(function(e){ e.classList.remove("tut-highlight"); });
+    if(s && s.target){
+      const el = document.querySelector(s.target);
+      if(el){
+        el.classList.add("tut-highlight");
+        try{ el.scrollIntoView({ block:"center", behavior:"smooth" }); }catch(e){}
+      }
+    }
+    const last = tutIdx === tutSteps.length - 1;
+    const isCtx = tutMode === "ctx";
+    const labelSkip = isCtx ? "Agora não" : "Pular";
+    tutShowCard(
+      '<h3>' + s.title + '</h3>' +
+      '<div class="tut-body">' + s.html + '</div>' +
+      '<div class="tut-progress">Passo ' + (tutIdx + 1) + ' de ' + tutSteps.length + '</div>' +
+      (isCtx ? '<label class="tut-dont"><input type="checkbox" id="tutDont"> Não mostrar esta explicação novamente</label>' : '') +
+      '<div class="tut-actions">' +
+        '<button class="btn" onclick="tutSkip()">' + labelSkip + '</button>' +
+        '<button class="btn btn-primary" onclick="tutNext()">' + (last ? 'Entendi ✓' : 'Próximo') + '</button>' +
+      '</div>' +
+      (!isCtx && tutSteps.length > 1 ? '<button class="tut-skip" onclick="tutSkip()">Pular tudo</button>' : '')
+    );
+  }
+
+  // ---- Ajuda contextual (aparece 1 vez por função) ----
+  function tutCtx(key, title, text, targetSel){
+    if(tutState.skipAll || tutState.ctx[key] || tutState.dont[key]) return;
+    tutPlay([{ title:title, html:text, target:targetSel || null }], "ctx", key);
+  }
+
+  // ---- Menu "Como usar" ----
+  function tutOpenMenu(){
+    const topics = TUT_TOPICS.map(function(t, i){
+      return '<button class="tut-topic" onclick="tutPlayTopic(' + i + ')"><span style="font-size:18px;">' + t.icon + '</span><span>' + t.title + '</span></button>';
+    }).join("");
+    tutShowCard(
+      '<h3>❓ Como usar</h3>' +
+      '<div class="tut-body">' +
+        '<button class="tut-topic" onclick="tutPlay(TUT_INTRO, \'intro\')"><span>🎬</span><span>Ver apresentação inicial</span></button>' +
+        '<button class="tut-topic" onclick="tutPlay(TUT_RAPIDO, \'rapido\')"><span>⚡</span><span>Tutorial rápido (1–2 min)</span></button>' +
+        topics +
+      '</div>' +
+      '<button class="tut-skip" onclick="tutClose()">Fechar ✕</button>'
+    );
+  }
+  window.tutOpenMenu = tutOpenMenu;
+  window.tutPlayTopic = function(i){ tutPlay(TUT_TOPICS[i].steps, "topic"); };
+  window.TUT_INTRO = TUT_INTRO;
+  window.TUT_RAPIDO = TUT_RAPIDO;
+
+  // ---- Ganchos de primeiro uso (preservam as funções originais) ----
+  const _openModalOrig = window.openModal;
+  window.openModal = function(id){
+    _openModalOrig(id);
+    if(!id) tutCtx("addItem", "Adicionar ocorrência ➕",
+      "Use este formulário quando encontrar um <b>novo problema</b> ou precisar registrar um novo serviço.<br><br>📌 Se o mesmo quarto tiver outro problema no futuro, crie uma <b>nova ocorrência</b> — o histórico fica reunido no mesmo local.",
+      "#fRoom");
+  };
+
+  const _quickAddPhotoOrig = window.quickAddPhoto;
+  window.quickAddPhoto = function(id, tipo){
+    tutCtx("fotos", "Adicionar fotos 📷",
+      "Fotografe para documentar o problema e o resultado:<br>• <b>Antes</b> — como estava<br>• <b>Depois</b> — como ficou o serviço");
+    _quickAddPhotoOrig(id, tipo);
+  };
+
+  const _exportBackupOrig = window.exportFullBackup;
+  window.exportFullBackup = function(){
+    tutCtx("backup", "Backup 💾",
+      "O backup salva <b>todos os locais e itens</b> (incluindo fotos) em um arquivo JSON na pasta Downloads.<br><br>Guarde esse arquivo com segurança — é a cópia completa do seu sistema.");
+    _exportBackupOrig();
+  };
+
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click", function(){
+      if(t.dataset.tab === "orcamentos"){
+        tutCtx("orcamentos", "Área de Orçamentos 🧾",
+          "Aqui ficam os serviços que precisam de <b>orçamento futuro</b>: peças, instalações ou serviços a planejar.<br><br>Registre o que precisa ser orçado e acompanhe nesta aba.");
+      }
+      if(t.dataset.tab === "arquivados"){
+        tutCtx("arquivados", "Histórico / Arquivados 🗂️",
+          "Itens arquivados são serviços <b>concluídos</b>. Eles saem das pendências mas <b>nunca são apagados</b> — formam o histórico do local.");
+      }
+    });
+  });
+
+  // ---- Apresentação inicial (apenas no primeiro acesso) ----
+  if(!tutState.intro && !tutState.skipAll){
+    setTimeout(function(){ tutPlay(TUT_INTRO, "intro"); }, 700);
+  }
+
   renderHome();
 })();
 </script>  </body>
